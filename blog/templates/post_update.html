@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Update post
+{% endblock %}
+
+
+
+{% block content %}
+
+
+<form class="" action="{{ app.router['post_update'].url_for(slug=slug) }}" method="post">
+
+
+
+    {% for field in form %}
+        <div class="form-group">
+            {% if field.errors %}
+            <div class="alert alert-danger">
+                {{ field.errors }}
+            </div>
+            {% endif %}
+
+            {{ field.label(class='control-label') }} :
+            {{ field(class='form-control') }}
+        </div>
+    {% endfor %}
+    <div class="form-group">
+        <select multiple  class="form-control" id="exampleFormControlSelect1">
+
+
+            {% for field in category_list_for_post %}
+                 <option>{{ field }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-dark">Update Post</button>
+</form>
+
+
+
+{% endblock%}

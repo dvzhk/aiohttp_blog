@@ -1,0 +1,17 @@
+{% extends 'base.html'%}
+
+{% block title %}
+    {{ obj.get('tag') }}
+{% endblock %}
+
+{% block content %}
+{% include 'delete_obj_div.html' %}
+<br>
+<h2>Tag: {{ obj.get('tag') }}</h2>
+Related posts:
+
+{% for i, post in posts %}
+<a href="{{ app.router['read_post'].url_for(slug=post.get('slug', 'No_slug?')) }}">{{ post.get('title') }}</a>{{', ' if i < number_of_commas}}
+{% endfor %}
+
+{% endblock %}

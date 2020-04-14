@@ -1,0 +1,23 @@
+{% extends 'base.html'%}
+
+{% block title %}
+Categories
+{% endblock %}
+
+{% block content %}
+
+<h2>Categories</h2>
+
+{% for category in category_list %}
+<div class="card">
+   <h5 class="card-header">{{ category.get('category') }}</h5>
+   <div class="card-body">
+      <h5 class="card-title">{{ category.get('category') }}</h5>
+
+      <a href="{{ app.router['category_view'].url_for(slug=category.get('slug', 'No_slug?')) }}" class="btn btn-dark">Read</a>
+   </div>
+</div>
+
+{% endfor %}
+
+{% endblock %}

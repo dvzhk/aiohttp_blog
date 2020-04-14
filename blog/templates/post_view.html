@@ -1,0 +1,28 @@
+{% extends 'base.html'%}
+
+{% block title %}
+    {{ obj.get('title') }}
+{% endblock %}
+
+{% block content %}
+<div align="right"><br><a class="btn btn-light" href="{{ app.router['post_update'].url_for(slug=obj.get('slug')) }}"
+                      role="button">Edit post</a><a class="btn btn-outline-danger" href="{{ app.router['delete_post'].url_for(slug=obj.get('slug')) }}"
+                      role="button">Delete post</a>
+</div>
+<br>
+<div><h2>{{ obj.get('title') }}</h2></div>  <div></div>
+
+
+<article>
+    {{ obj.get('body') }}</article>
+
+{% for i, tag in category_list_for_post %}
+<a href="{{ app.router['category_view'].url_for(slug=category.get('slug')) }}">{{ category.get('category') }}</a>
+{{ "," if i <  number_of_commas }}
+
+{% endfor %}
+<p>{{ obj.get('date_pub') }}</p>
+
+
+
+{% endblock %}

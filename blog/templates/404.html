@@ -1,0 +1,12 @@
+{% extends 'base.html'%}
+
+{% block title %}
+{{ site_name } - Стараница не найденв
+{% endblock %}
+
+{% block content %}
+
+<h2>Page not Found</h2>
+    <p>site name - {{ site_name }}</p>
+<a href="{{ app.router['/'].url_for() }}">Main page</a>
+{% endblock %}

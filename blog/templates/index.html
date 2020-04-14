@@ -1,0 +1,23 @@
+{% extends 'base.html'%}
+
+{% block title %}
+Список постов
+{% endblock %}
+
+{% block content %}
+
+<h2>Список постов</h2>
+
+{% for post in post_list %}
+<div class="card">
+   <h5 class="card-header">{{ post.get('date_pub') }}</h5>
+   <div class="card-body">
+      <h5 class="card-title">{{ post.get('title') }}</h5>
+      <p class="card-text">{{ post.get('body')[:50] }}</p>
+      <a href="{{ app.router['read_post'].url_for(slug=post.get('slug', 'No_slug?')) }}" class="btn btn-dark">Read</a>
+   </div>
+</div>
+<br>
+{% endfor %}
+
+{% endblock %}
