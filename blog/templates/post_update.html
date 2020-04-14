@@ -25,15 +25,7 @@ Update post
             {{ field(class='form-control') }}
         </div>
     {% endfor %}
-    <div class="form-group">
-        <select multiple  class="form-control" id="exampleFormControlSelect1">
 
-
-            {% for field in category_list_for_post %}
-                 <option>{{ field }}</option>
-            {% endfor %}
-        </select>
-    </div>
     <button type="submit" class="btn btn-dark">Update Post</button>
 </form>
 

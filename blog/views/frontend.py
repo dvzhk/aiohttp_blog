@@ -24,14 +24,15 @@ async def index(request):
 def post_view(request):
     return utils.post_view_delete(request)
 
-class PostCreate(aiohttp.web.View):
+
+class CategoryChoiceMixin:
     async def get_choices(self):
         async with self.request.app['db'].acquire() as conn:
             query = select([db.categories.c.id, db.categories.c.category])
             categories = await conn.fetch(query)
-
         return categories
 
+class PostCreate(CategoryChoiceMixin, aiohttp.web.View):
     @template('post_create.html')
     async def get(self):
         new_post_form = forms.PostForm()
@@ -111,39 +112,21 @@ async def obj_list(request, table):
     return {'post': result[0]}
 
 
-class PostUpdate(aiohttp.web.View):
+class PostUpdate(CategoryChoiceMixin, aiohttp.web.View):
     @template('post_update.html')
     async def get(self):
         slug = self.request.match_info['slug']
         async with self.request.app['db'].acquire() as conn:
             query = select([db.posts]).where(db.posts.c.slug == slug)
             result = await conn.fetch(query)
-
-
             current_post_id = result[0].get('id')
-            category_list_query = select([db.categories]).where(db.categories.c.id == db.posts.c.category_id)
+            category_query = select([db.categories]).where(db.categories.c.id == result[0].get('category_id'))
+            category = await conn.fetch(category_query)
 
-            category_list_for_post = await conn.fetch(category_list_query)
-        print(dir(result[0]))
-        print(result[0].values())
-        form = [1]
         form = forms.PostForm(obj=result[0], data=result[0])
-        #form.tags.render_kw['class'] = 'form-group'
-        #form.tags =
-        #print("---=", form.tags.entries)
-        print("P---=", form.title.data)
-        print()
-        print(dir(form))
-        print()
-        #print(dir(form.tags))
-        #form = 1     obj=result[0]
-        #print(form.id)
-        print()
-        print(category_list_for_post[0].keys())
+        form.category.choices = await self.get_choices()
 
-        return {'obj': result[0], 'slug':slug, 'category_list_for_post': enumerate(category_list_for_post), \
-                'number_of_commas': len(category_list_for_post) - 1, \
-                'form': form}
+        return {'obj': result[0], 'slug':slug, 'category': category, 'form': form}
 
     @template('post_update.html')
     async def post(self):

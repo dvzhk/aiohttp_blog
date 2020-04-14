@@ -19,11 +19,12 @@ async def post_view_delete(request, delete_route=None, view_route=None):
         query = select([db.posts]).where(db.posts.c.slug == slug)
         result = await conn.fetch(query)
         current_post_id = result[0].get('id')
-        category_query = select([db.categories]).where(db.categories.c.id == db.posts.c.category_id)
+        print(result)
+        category_query = select([db.categories]).where(db.categories.c.id == result[0].get('category_id'))
 
-        category_for_post = await conn.fetch(category_query)
-    return {'obj': result[0], 'category_for_post': enumerate(category_for_post), \
-            'number_of_commas': len(category_for_post) - 1, 'delete_route': delete_route, 'view_route': view_route}
+        category = await conn.fetch(category_query)
+        print(category[0])
+    return {'obj': result[0], 'category': category[0], 'delete_route': delete_route, 'view_route': view_route}
 
 
 async def category_view_delete(request, delete_route=None, view_route=None):
