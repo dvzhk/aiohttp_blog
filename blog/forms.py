@@ -1,8 +1,9 @@
 from wtforms_alchemy import ModelForm, ModelFieldList, QuerySelectField
 from wtforms.csrf.session import SessionCSRF
 from datetime import timedelta
-from wtforms.fields import FormField, FieldList, SelectField, SelectMultipleField
+from wtforms.fields import FormField, FieldList, SelectField
 from .db import PostObj, CategoryObj
+#from . import db
 from wtforms.validators import InputRequired
 class CsrfAdd:
     csrf = True

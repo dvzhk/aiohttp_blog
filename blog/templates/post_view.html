@@ -17,7 +17,7 @@
 <article>
     {{ obj.get('body') }}</article>
 
-<div>Category: 
+<div>Category:
 <a href="{{ app.router['category_view'].url_for(slug=category.get('slug')) }}">{{ category.get('category') }}</a>
 </div>
 

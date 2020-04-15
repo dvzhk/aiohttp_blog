@@ -1,9 +1,16 @@
 from sqlalchemy import (
     Table, Text, VARCHAR, MetaData, Column, Integer, DateTime, ForeignKey)
-from sqlalchemy.orm import mapper, relationship
+from sqlalchemy.orm import mapper
 import datetime
 import re
-from .utils import slugify
+
+
+def slugify(title):
+    pattern = r'[^\w+]'
+    slug = re.sub(pattern, '-', title.lower())
+    return slug
+
+
 meta = MetaData()
 
 posts = Table(
@@ -15,7 +22,6 @@ posts = Table(
     Column('slug', VARCHAR(255), nullable=False),
     Column('category_id', Integer, ForeignKey('categories.id'), nullable=True)
 )
-
 
 categories = Table(
     'categories', meta,
@@ -52,5 +58,5 @@ class CategoryObj(object):
         return f"<CategoryObj({self.category}, {self.slug})>"
 
 
-category_mapper = mapper(CategoryObj, categories)
 post_mapper = mapper(PostObj, posts)
+category_mapper = mapper(CategoryObj, categories)
