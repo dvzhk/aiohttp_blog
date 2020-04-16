@@ -17,4 +17,5 @@ def setup_routes(app):
     app.router.add_view('/categories/{slug}/update', frontend.CategoryUpdate, name='category_update')
     app.router.add_view('/categories/{slug}/delete', frontend.CategoryDelete, name='delete_category')
 
+    app.router.add_route('GET', '/posts/search', frontend.search, name='search')
 

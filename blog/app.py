@@ -8,7 +8,7 @@ import aiohttp_debugtoolbar
 
 async def create_app(config: dict):
     app = web.Application()
-    aiohttp_debugtoolbar.setup(app, intercept_redirects=False)
+    #aiohttp_debugtoolbar.setup(app, intercept_redirects=False)
     #Создаем новый ключ для конфига
     app['config'] = config
 

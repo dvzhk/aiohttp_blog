@@ -1,10 +1,10 @@
 import aiohttp.web
 from aiohttp_jinja2 import template, render_template
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, or_
 # Импортируем модель
 from .. import db, forms
 from . import utils
-
+from datetime import datetime
 
 @template('index.html')
 async def index(request):
@@ -95,7 +95,17 @@ class CategoryDelete(utils.CategoryViewDeleteMixinGETMixin, utils.ObjDeleteMixin
     html_template = 'category_delete.html'
 
 
-
-
-
-
+@template('index.html')
+async def search(request):
+    text_for_search = request.query.get('text')
+    start = datetime.now()
+    async with request.app['db'].acquire() as conn:
+        query = select([db.posts]).where(or_(db.posts.c.body.contains(text_for_search),
+                                             db.posts.c.title.contains(text_for_search)
+                                             )
+                                         )
+        #print(query.compile())
+        result = await conn.fetch(query)
+    #print(datetime.now() - start)
+    #print(f'Found: {len(result)} records.')
+    return {'post_list': result}
