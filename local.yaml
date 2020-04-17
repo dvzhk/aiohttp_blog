@@ -1,3 +1,4 @@
 # our config
 site_name: "Demo aiohttp blog (dev env)"
+aiohttp_debugtoolbar: yes
 

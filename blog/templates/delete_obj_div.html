@@ -2,8 +2,9 @@
     <center>
         <br>
 
-        <form class="" action="{{ app.router[delete_route].url_for(slug=obj.get('slug')) }}" method="post">
-            <h2>Действительно хотите удалить? <a class="btn btn-dark" href="{{ app.router[view_route].url_for(slug=obj.get('slug')) }}" role="button">Нет</a>
+        <form class="" action="{{ app.router[delete_route].url_for(slug=slug) }}" method="post">
+            <h2>Действительно хотите удалить?
+                <a class="btn btn-dark" href="{{ app.router[view_route].url_for(slug=slug) }}" role="button">Нет</a>
             <button type="submit" class="btn btn-danger">Да</button></h2>
         </form>
            <br>

@@ -1,23 +1,17 @@
 {% extends 'base.html'%}
 
-{% block title %}
-Categories
-{% endblock %}
+{%block title%}Categories{%endblock%}
 
-{% block content %}
-
-<h2>Categories</h2>
-
-{% for category in category_list %}
-<div class="card">
-   <h5 class="card-header">{{ category.get('category') }}</h5>
-   <div class="card-body">
-      <h5 class="card-title">{{ category.get('category') }}</h5>
-
-      <a href="{{ app.router['category_view'].url_for(slug=category.get('slug', 'No_slug?')) }}" class="btn btn-dark">Read</a>
-   </div>
+{%block content%}
+<h2 align="center">Categories</h2>
+<div class="list-group list-group-flush" id="categories1">
+  {% for category in category_list %}
+    <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+      href="{{ app.router['category_view'].url_for(slug=category.get('slug')) }}">
+        {{ category.get('category') }}
+        <span class="badge badge-dark badge-pill">
+            {{category.get('post_count')}} post{%if category.get('post_count') != 1%}s{% endif %}</span>
+    </a>
+    {% endfor %}
 </div>
-
-{% endfor %}
-
-{% endblock %}
+{%endblock%}

@@ -1,24 +1,33 @@
 import aiohttp.web
-from aiohttp_jinja2 import template, render_template
-from sqlalchemy import select, insert, or_
+from aiohttp_jinja2 import template
+from sqlalchemy import select, func, or_, join, text
 # Импортируем модель
 from .. import db, forms
 from . import utils
-from datetime import datetime
+from aiohttp_cache import cache
 
+
+@cache()
 @template('index.html')
 async def index(request):
-    #site_name = request.app['config'].get('site_name')
     async with request.app['db'].acquire() as conn:
         query = select([db.posts.c.title, db.posts.c.body, db.posts.c.slug, db.posts.c.date_pub])
+        #print(dir(query))
         result = await conn.fetch(query)
     return {'post_list': result}
 
 
+#@cache()
 @template('category_list.html')
 async def categories_list_view(request):
     async with request.app['db'].acquire() as conn:
-        query = select([db.categories.c.category, db.categories.c.slug])
+        # SELECT category, count(posts.id) AS "post_count" FROM categories
+        # LEFT OUTER JOIN posts ON posts.category_id=categories.id GROUP BY category ORDER BY post_count DESC;
+        posts_cat_join = join(db.categories, db.posts,  db.posts.c.category_id == db.categories.c.id, isouter=True)
+        query = select([db.categories.c.category, db.categories.c.slug, func.count(db.posts.c.id).label('post_count')])\
+            .select_from(posts_cat_join).group_by(db.categories.c.category, db.categories.c.slug)\
+            .order_by(text('post_count DESC'))
+        # print(query)
         result = await conn.fetch(query)
     return {'category_list': result}
 
@@ -40,6 +49,7 @@ class PostCreate(utils.PostCreateUpdateMixin, aiohttp.web.View):
     html_template = "post_create.html"
     redirect_to = 'index'
 
+    @cache()
     @template(html_template)
     async def get(self):
         new_post_form = forms.PostForm()
@@ -98,7 +108,6 @@ class CategoryDelete(utils.CategoryViewDeleteMixinGETMixin, utils.ObjDeleteMixin
 @template('index.html')
 async def search(request):
     text_for_search = request.query.get('text')
-    start = datetime.now()
     async with request.app['db'].acquire() as conn:
         query = select([db.posts]).where(or_(db.posts.c.body.contains(text_for_search),
                                              db.posts.c.title.contains(text_for_search)
@@ -106,6 +115,4 @@ async def search(request):
                                          )
         #print(query.compile())
         result = await conn.fetch(query)
-    #print(datetime.now() - start)
-    #print(f'Found: {len(result)} records.')
     return {'post_list': result}

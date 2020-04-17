@@ -1,34 +1,8 @@
 import aiohttp
-from sqlalchemy import select
-from aiohttp_jinja2 import template, render_template
+from sqlalchemy import select, join
+from aiohttp_jinja2 import render_template
 from .. import db, forms
-from datetime import datetime
-
-
-async def post_view_delete(request, delete_route=None, view_route=None):
-    slug = request.match_info['slug']
-    async with request.app['db'].acquire() as conn:
-        query = select([db.posts]).where(db.posts.c.slug == slug)
-        result = await conn.fetch(query)
-        current_post_id = result[0].get('id')
-        category_query = select([db.categories]).where(db.categories.c.id == result[0].get('category_id'))
-        category = await conn.fetch(category_query)
-    return {'obj': result[0], 'category': category[0], 'delete_route': delete_route, 'view_route': view_route}
-
-
-async def category_view_delete(request, delete_route=None, view_route=None):
-    slug = request.match_info['slug']
-    async with request.app['db'].acquire() as conn:
-        query = select([db.categories]).where(db.categories.c.slug == slug)
-        result = await conn.fetch(query)
-
-        category_id = result[0].get('id')
-        related_posts_query = select([db.posts.c.title, db.posts.c.slug])\
-            .where(db.categories.c.id == db.posts.c.category_id)
-        posts_in_category = await conn.fetch(related_posts_query)
-
-    return {'obj': result[0], 'posts': enumerate(posts_in_category), 'number_of_commas': len(posts_in_category) - 1,\
-            'delete_route': delete_route, 'view_route': view_route}
+from aiohttp_cache import cache
 
 
 class PostViewDeleteGETMixin:
@@ -45,7 +19,7 @@ class PostViewDeleteGETMixin:
             category_query = select([db.categories]).where(db.categories.c.id == result[0].get('category_id'))
             category = await conn.fetch(category_query)
 
-        context = {'obj': result[0], 'category': category[0], 'delete_route': self.delete_route,
+        context = {'obj': result[0], 'category': category[0], 'slug': slug, 'delete_route': self.delete_route,
                    'view_route': self.view_route}
         response = render_template(self.html_template, self.request, context)
         return response
@@ -115,6 +89,7 @@ class CategoryCreateUpdateMixin:
     html_template = 'category_create_update.html'
     redirect_to = 'category_list'
 
+    cache()
     async def get(self):
         form_submit_url = self.request.url
         category = None
@@ -124,7 +99,7 @@ class CategoryCreateUpdateMixin:
             slug = self.request.match_info['slug']
             async with self.request.app['db'].acquire() as conn:
                 query = select([db.categories.c.id, db.categories.c.category]).where(db.categories.c.slug == slug)
-                category_records = await conn.fetch(query).first()
+                category_records = await conn.fetch(query)
 
             category_record = category_records[0]
             category = category_record.get('category')
@@ -164,30 +139,16 @@ class CategoryViewDeleteMixinGETMixin:
     async def get(self):
         slug = self.request.match_info['slug']
         async with self.request.app['db'].acquire() as conn:
-            query = select([db.categories]).where(db.categories.c.slug == slug)
-            result = await conn.fetch(query)
-            category_id = result[0].get('id')
-            related_posts_query = select([db.posts.c.title, db.posts.c.slug])\
-                .where(db.categories.c.id == db.posts.c.category_id)
-            posts_in_category = await conn.fetch(related_posts_query)
-
-        context = {'obj': result[0], 'posts': enumerate(posts_in_category),
-                   'number_of_commas': len(posts_in_category) - 1,
+            # SELECT category, category_id, title FROM categories
+            # JOIN posts ON category_id=categories.id WHERE categories.slug='test';
+            posts_cat_join = join(db.categories, db.posts, db.posts.c.category_id == db.categories.c.id, isouter=True)
+            query = select([db.categories.c.id, db.categories.c.category, db.posts]).select_from(posts_cat_join)\
+                .where(slug == db.categories.c.slug)
+            print(query)
+            posts_in_category = await conn.fetch(query)
+            print(posts_in_category)
+        context = {'posts': posts_in_category, 'slug': slug,
                    'delete_route': self.delete_route, 'view_route': self.view_route}
         response = render_template(self.html_template, self.request, context)
         return response
 
-
-class ObjViewDelete:
-    obj = None
-
-    async def get(self, request):
-        slug = request.match_info['slug']
-        async with request.app['db'].acquire() as conn:
-            query = select([self.obj]).where(self.obj.c.slug == slug)
-            result = await conn.fetch(query)
-
-            obj_id = result[0].get('id')
-            related_obj_query = select([db.posts.c.title, db.posts.c.slug]).\
-                where(db.categories.c.id == db.posts.c.category_id)
-            posts_with_tag = await conn.fetch(related_obj_query)

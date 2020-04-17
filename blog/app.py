@@ -4,16 +4,18 @@ import aiohttp_jinja2
 import jinja2
 import asyncpgsa
 import aiohttp_debugtoolbar
-
+from aiohttp_cache import setup_cache
 
 async def create_app(config: dict):
     app = web.Application()
-    #aiohttp_debugtoolbar.setup(app, intercept_redirects=False)
+    if config.get('aiohttp_debugtoolbar'):
+        aiohttp_debugtoolbar.setup(app, intercept_redirects=False)
+
     #Создаем новый ключ для конфига
     app['config'] = config
 
     setup_routes(app)
-
+    setup_cache(app)
     #Добавляем действия выполняемые при запуске и остановке приложения
     app.on_startup.append(on_start)
     app.on_cleanup.append(on_shutdown)

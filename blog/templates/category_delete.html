@@ -1,17 +1,21 @@
 {% extends 'base.html'%}
 
 {% block title %}
-    {{ obj.get('tag') }}
+    {{ posts[0].get('category') }}
 {% endblock %}
 
 {% block content %}
-{% include 'delete_obj_div.html' %}
-<br>
-<h2>Tag: {{ obj.get('tag') }}</h2>
-Related posts:
 
-{% for i, post in posts %}
-<a href="{{ app.router['read_post'].url_for(slug=post.get('slug', 'No_slug?')) }}">{{ post.get('title') }}</a>{{', ' if i < number_of_commas}}
-{% endfor %}
+    {% include 'delete_obj_div.html' %}
+    <h2>Category {{ posts[0].get('category') }}. Related posts:</h2>
+    <br>
+    {% if posts[0].get('title') %}
+            {% for post in posts %}
+            {% include 'include/postcard.html'%}
+            {% endfor %}
+        {% else %}
+            <p>No any posts.</p>
+        {% endif %}
+
 
 {% endblock %}
