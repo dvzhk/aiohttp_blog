@@ -1,17 +1,15 @@
 {% extends 'base.html'%}
 
 {% block title %}
-    Delete {{ obj.get('title') }} ?
+    Delete {{ post.get('title') }} ?
 {% endblock %}
 
+
 {% block content %}
-
 {% include 'delete_obj_div.html' %}
-<h2>{{ obj.get('title') }}</h2>
+<h2>{{ post.get('title') }}</h2>
 
-<article>
-    {{ obj.get('body') }}</article>
+<article>{{ post.get('body') }}</article>
 
-
-<p>{{ obj.get('date_pub') }}</p>
+<i>{{ post.get('date_pub') }}</i>
 {% endblock %}

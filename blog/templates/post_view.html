@@ -1,27 +1,27 @@
 {% extends 'base.html'%}
 
 {% block title %}
-    {{ obj.get('title') }}
+    {{ post.get('title') }}
 {% endblock %}
 
 {% block content %}
-<div align="right"><br><a class="btn btn-light" href="{{ app.router['post_update'].url_for(slug=obj.get('slug')) }}"
+<div align="right"><br><a class="btn btn-light" href="{{ app.router['post_update'].url_for(slug=post.get('slug')) }}"
                       role="button">Edit post</a><a class="btn btn-outline-danger"
-                                                    href="{{ app.router['delete_post'].url_for(slug=obj.get('slug')) }}"
+                                                    href="{{ app.router['delete_post'].url_for(slug=post.get('slug')) }}"
                       role="button">Delete post</a>
 </div>
 <br>
-<div><h2>{{ obj.get('title') }}</h2></div>  <div></div>
+<div><h2>{{ post.get('title') }}</h2></div>  <div></div>
 
 
 <article>
-    {{ obj.get('body') }}</article>
+    {{ post.get('body') }}</article>
 
 <div>Category:
-<a href="{{ app.router['category_view'].url_for(slug=category.get('slug')) }}">{{ category.get('category') }}</a>
+<a href="{{ app.router['category_view'].url_for(slug=post.get('category_slug')) }}">{{ post.get('category') }}</a>
 </div>
 
-<p>{{ obj.get('date_pub') }}</p>
+<i>{{ post.get('date_pub') }}</i>
 
 
 

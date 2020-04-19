@@ -13,13 +13,20 @@ class PostViewDeleteGETMixin:
     async def get(self):
         slug = self.request.match_info['slug']
         async with self.request.app['db'].acquire() as conn:
-            query = select([db.posts]).where(db.posts.c.slug == slug)
+            """query = select([db.posts]).where(db.posts.c.slug == slug)
             result = await conn.fetch(query)
             current_post_id = result[0].get('id')
             category_query = select([db.categories]).where(db.categories.c.id == result[0].get('category_id'))
-            category = await conn.fetch(category_query)
+            category = await conn.fetch(category_query)"""
+            posts_cat_join = join(db.posts, db.categories, db.posts.c.category_id == db.categories.c.id, isouter=True)
+            query = select([db.posts, db.categories.c.category, db.categories.c.slug.label('category_slug')])\
+                .select_from(posts_cat_join).where(db.posts.c.slug == slug)
+            print(query)
+            result = await conn.fetch(query)
+            for i in result[0].items():
+                print(i)
 
-        context = {'obj': result[0], 'category': category[0], 'slug': slug, 'delete_route': self.delete_route,
+        context = {'post': result[0], 'slug': slug, 'delete_route': self.delete_route,
                    'view_route': self.view_route}
         response = render_template(self.html_template, self.request, context)
         return response
@@ -144,9 +151,7 @@ class CategoryViewDeleteMixinGETMixin:
             posts_cat_join = join(db.categories, db.posts, db.posts.c.category_id == db.categories.c.id, isouter=True)
             query = select([db.categories.c.id, db.categories.c.category, db.posts]).select_from(posts_cat_join)\
                 .where(slug == db.categories.c.slug)
-            print(query)
             posts_in_category = await conn.fetch(query)
-            print(posts_in_category)
         context = {'posts': posts_in_category, 'slug': slug,
                    'delete_route': self.delete_route, 'view_route': self.view_route}
         response = render_template(self.html_template, self.request, context)
