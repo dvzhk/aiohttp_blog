@@ -4,12 +4,11 @@
     Delete {{ post.get('title') }} ?
 {% endblock %}
 
-
 {% block content %}
-{% include 'delete_obj_div.html' %}
-<h2>{{ post.get('title') }}</h2>
+    {% include 'delete_obj_div.html' %}
+    <h2>{{ post.get('title') }}</h2>
 
-<article>{{ post.get('body') }}</article>
+    <article>{{ post.get('body') }}</article>
 
-<i>{{ post.get('date_pub') }}</i>
+    <i>{{ post.get('date_pub') }}</i>
 {% endblock %}

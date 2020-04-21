@@ -1,25 +1,30 @@
 import aiohttp.web
 from aiohttp_jinja2 import template
 from sqlalchemy import select, func, or_, join, text
-# Импортируем модель
+from aiohttp_cache import cache
+from aiohttp_security import (
+    remember, forget, authorized_userid,
+    check_permission, check_authorized,
+)
 from .. import db, forms
 from . import utils
-from aiohttp_cache import cache
+from .. import auth
+from .. import users
 
-
-@cache()
+#@cache()
 @template('index.html')
 async def index(request):
+    username = await authorized_userid(request)
     async with request.app['db'].acquire() as conn:
         query = select([db.posts.c.title, db.posts.c.body, db.posts.c.slug, db.posts.c.date_pub])
-        #print(dir(query))
         result = await conn.fetch(query)
-    return {'post_list': result}
+    return {'post_list': result, 'logged': username}
 
 
 #@cache()
 @template('category_list.html')
 async def categories_list_view(request):
+    username = await authorized_userid(request)
     async with request.app['db'].acquire() as conn:
         # SELECT category, count(posts.id) AS "post_count" FROM categories
         # LEFT OUTER JOIN posts ON posts.category_id=categories.id GROUP BY category ORDER BY post_count DESC;
@@ -27,9 +32,8 @@ async def categories_list_view(request):
         query = select([db.categories.c.category, db.categories.c.slug, func.count(db.posts.c.id).label('post_count')])\
             .select_from(posts_cat_join).group_by(db.categories.c.category, db.categories.c.slug)\
             .order_by(text('post_count DESC'))
-        # print(query)
         result = await conn.fetch(query)
-    return {'category_list': result}
+    return {'category_list': result, 'logged': username}
 
 
 class PostView(utils.PostViewDeleteGETMixin, aiohttp.web.View):
@@ -52,9 +56,14 @@ class PostCreate(utils.PostCreateUpdateMixin, aiohttp.web.View):
     @cache()
     @template(html_template)
     async def get(self):
-        new_post_form = forms.PostForm()
-        new_post_form.category.choices = await self.get_choices()
-        return {'form': new_post_form}
+        username = await authorized_userid(self.request)
+        if username:
+            new_post_form = forms.PostForm()
+            new_post_form.category.choices = await self.get_choices()
+            return {'form': new_post_form, 'logged': username}
+        else:
+            response = aiohttp.web.HTTPForbidden
+            raise response
 
 
 class PostUpdate(utils.PostCreateUpdateMixin, aiohttp.web.View):
@@ -74,13 +83,17 @@ class PostUpdate(utils.PostCreateUpdateMixin, aiohttp.web.View):
 
     @template(html_template)
     async def get(self):
-        self.slug = self.request.match_info['slug']
-        post, category = await self.get_post_and_category()
+        username = await authorized_userid(self.request)
+        if username:
+            self.slug = self.request.match_info['slug']
+            post, category = await self.get_post_and_category()
 
-        form = forms.PostForm(obj=post[0], data=post[0])
-        form.category.choices = await self.get_choices()
-        form.category.data = post[0].get('category_id')
-        return {'obj': post[0], 'slug': self.slug, 'category': category, 'form': form}
+            form = forms.PostForm(obj=post[0], data=post[0])
+            form.category.choices = await self.get_choices()
+            form.category.data = post[0].get('category_id')
+            return {'obj': post[0], 'slug': self.slug, 'category': category, 'form': form, 'logged': username}
+        else:
+            raise aiohttp.web.HTTPForbidden
 
 
 class CategoryCreate(utils.CategoryCreateUpdateMixin, aiohttp.web.View):
@@ -107,6 +120,7 @@ class CategoryDelete(utils.CategoryViewDeleteMixinGETMixin, utils.ObjDeleteMixin
 
 @template('index.html')
 async def search(request):
+    username = await authorized_userid(request)
     text_for_search = request.query.get('text')
     async with request.app['db'].acquire() as conn:
         query = select([db.posts]).where(or_(db.posts.c.body.contains(text_for_search),
@@ -115,4 +129,32 @@ async def search(request):
                                          )
         #print(query.compile())
         result = await conn.fetch(query)
-    return {'post_list': result}
+    return {'post_list': result, 'logged': username}
+
+
+@template('login_template.html')
+async def login(request):
+    username = await authorized_userid(request)
+    if request.method == 'POST':
+        data = await request.post()
+        user = data.get('username')
+        password = data.get('password')
+        if await auth.check_credentials(users.users, user, password):
+            location = request.app.router['index'].url_for()
+            response = aiohttp.web.HTTPFound(location=location)
+            await remember(request, response, user)
+            raise response
+        return {'errors': "Wrong username or password.", 'username': user, 'logged': username}
+    else:
+        return {'logged': username}
+
+
+@template('logout_template.html')
+async def logout(request):
+    username = await authorized_userid(request)
+    if request.method == 'POST' and username:
+        location = request.app.router['index'].url_for()
+        response = aiohttp.web.HTTPFound(location=location)
+        await forget(request, response)
+        raise response
+    return {'logged': username}

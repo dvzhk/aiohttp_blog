@@ -1,3 +1,4 @@
 # Default config
 site_name: "Demo aiohttp blog"
-database_uri: postgresql://docker:docker@localhost:5432/demo
+aiohttp_debugtoolbar: no
+database_uri: postgresql://docker:docker@postgres_db:5432/blog

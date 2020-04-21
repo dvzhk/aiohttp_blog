@@ -1,7 +1,7 @@
 import aiohttp
-from blog import create_app
 import asyncio
 import argparse
+from blog import create_app
 from blog.settings import load_config
 
 try:
@@ -15,7 +15,6 @@ parser = argparse.ArgumentParser(description="blog")
 parser.add_argument('--host', help='host', default='0.0.0.0')
 parser.add_argument('--port', help='port', default=8080)
 parser.add_argument('--reload', action='store_true', help='Autoreload config')
-
 parser.add_argument('--config', type=argparse.FileType('r'), help='Path to config file')
 
 args = parser.parse_args()
@@ -28,6 +27,5 @@ if args.reload:
     aioreloader.start()
 
 if __name__ == '__main__':
-
     aiohttp.web.run_app(app, host=args.host, port=args.port)
 

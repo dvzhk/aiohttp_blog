@@ -1,0 +1,28 @@
+version: '3.1'
+
+services:
+
+  postgres_db:
+    build:
+      context: .
+      dockerfile: Dockerfile-db
+    restart: always
+    ports:
+      - 5433:5432
+
+    environment:
+      POSTGRES_PASSWORD: docker
+      POSTGRES_USER: docker
+      POSTGRES_DB: blog
+
+#    volumes:
+#       - /var/db:/var/lib/postgresql/data
+
+  app:
+    build: .
+    command: python3 /app/entry.py --port 8000 --reload
+    restart: always
+    ports:
+       - "8000:8000"
+    depends_on:
+       - postgres_db

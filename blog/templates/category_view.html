@@ -5,11 +5,13 @@
 {% endblock %}
 
 {% block content %}
-<div align="right"><br><a class="btn btn-light" href="{{ app.router['category_update'].url_for(slug=slug) }}"
-                      role="button">Edit category</a>
-    <a class="btn btn-outline-danger" href="{{ app.router['delete_category'].url_for(slug=slug) }}"
-                      role="button">Delete category</a>
-</div>
+{% if logged %}
+    <div align="right"><br><a class="btn btn-light" href="{{ app.router['category_update'].url_for(slug=slug) }}"
+                          role="button">Edit category</a>
+        <a class="btn btn-outline-danger" href="{{ app.router['delete_category'].url_for(slug=slug) }}"
+                          role="button">Delete category</a>
+    </div>
+{% endif %}
 <br>
 <h2>Category {{ posts[0].get('category') }}. Related posts:</h2>
         {% if posts[0].get('title') %}

@@ -19,3 +19,7 @@ def setup_routes(app):
 
     app.router.add_route('GET', '/posts/search', frontend.search, name='search')
 
+    app.router.add_route('GET','/login', frontend.login, name='login')
+    app.router.add_route('POST', '/login', frontend.login, name='login')
+    app.router.add_route('GET', '/logout', frontend.logout, name='logout')
+    app.router.add_route('POST', '/logout', frontend.logout, name='logout')

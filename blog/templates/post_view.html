@@ -5,15 +5,15 @@
 {% endblock %}
 
 {% block content %}
+{% if logged %}
 <div align="right"><br><a class="btn btn-light" href="{{ app.router['post_update'].url_for(slug=post.get('slug')) }}"
                       role="button">Edit post</a><a class="btn btn-outline-danger"
                                                     href="{{ app.router['delete_post'].url_for(slug=post.get('slug')) }}"
                       role="button">Delete post</a>
 </div>
+{% endif %}
 <br>
-<div><h2>{{ post.get('title') }}</h2></div>  <div></div>
-
-
+<div><h2>{{ post.get('title') }}</h2></div>
 <article>
     {{ post.get('body') }}</article>
 
@@ -22,7 +22,4 @@
 </div>
 
 <i>{{ post.get('date_pub') }}</i>
-
-
-
 {% endblock %}

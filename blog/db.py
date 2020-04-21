@@ -1,8 +1,8 @@
+import datetime
+import re
 from sqlalchemy import (
     Table, Text, VARCHAR, MetaData, Column, Integer, DateTime, ForeignKey)
 from sqlalchemy.orm import mapper
-import datetime
-import re
 
 
 def slugify(title):

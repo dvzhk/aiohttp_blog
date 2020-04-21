@@ -1,0 +1,15 @@
+{%extends 'base.html'%}
+{% block content %}
+<div>
+    <center>
+        <br>
+
+        <form class="" action="{{ app.router['logout'].url_for() }}" method="post">
+            <h2>Do you want to sign out?
+                <a class="btn btn-dark" href="{{ app.router['index'].url_for() }}" role="button">Нет</a>
+            <button type="submit" class="btn btn-danger">Да</button></h2>
+        </form>
+           <br>
+    </center>
+</div>
+{% endblock %}

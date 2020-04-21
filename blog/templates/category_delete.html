@@ -5,8 +5,7 @@
 {% endblock %}
 
 {% block content %}
-
-    {% include 'delete_obj_div.html' %}
+{% include 'delete_obj_div.html' %}
     <h2>Category {{ posts[0].get('category') }}. Related posts:</h2>
     <br>
     {% if posts[0].get('title') %}
@@ -16,6 +15,4 @@
         {% else %}
             <p>No any posts.</p>
         {% endif %}
-
-
 {% endblock %}
