@@ -12,7 +12,7 @@ asyncpgsa==0.26.1
 attrs==19.3.0
 cffi==1.14.0
 chardet==3.0.4
-cryptography==2.9
+cryptography==3.2
 decorator==4.4.2
 hiredis==1.0.1
 idna==2.9
